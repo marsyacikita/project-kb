@@ -1,0 +1,58 @@
+# 1. Import library
+import pandas as pd
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import classification_report, accuracy_score
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# 2. Buat dataset
+data = {
+    "teks": [
+        "Fasilitas sangat baik",
+        "Internet lambat",
+        "Ruang kelas nyaman",
+        "Laboratorium lengkap",
+        "Toilet kotor",
+        "Tempat parkir luas",
+        "Perpustakaan penuh",
+        "Sistem AC bermasalah"
+    ],
+    "label": [1, 0, 1, 1, 0, 1, 0, 0]  # 1: Puas, 0: Tidak Puas
+}
+
+df = pd.DataFrame(data)
+
+# 3. Vektorisasi teks
+vectorizer = CountVectorizer()
+X = vectorizer.fit_transform(df["teks"]).toarray()  # Mengubah teks menjadi fitur numerik
+y = df["label"]
+
+# 4. Split data
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+
+# 5. Random Forest Classifier
+model = RandomForestClassifier(random_state=42)
+model.fit(X_train, y_train)
+
+# 6. Evaluasi model
+y_pred = model.predict(X_test)
+
+# Akurasi dan laporan
+print("Akurasi Model:", accuracy_score(y_test, y_pred))
+print("\nLaporan Klasifikasi:")
+print(classification_report(y_test, y_pred))
+
+# 7. Visualisasi Hasil
+# Perbandingan hasil prediksi dan label sebenarnya
+comparison = pd.DataFrame({"Prediksi": y_pred, "Aktual": y_test})
+sns.heatmap(comparison.T, cmap="coolwarm", annot=True, cbar=False)
+plt.title("Perbandingan Prediksi vs Aktual")
+plt.show()
+
+# 8. Prediksi Teks Baru
+new_text = ["Kualitas fasilitas sangat buruk"]
+new_text_vectorized = vectorizer.transform(new_text).toarray()
+prediction = model.predict(new_text_vectorized)
+print("Prediksi untuk teks baru:", "Puas" if prediction[0] == 1 else "Tidak Puas")
